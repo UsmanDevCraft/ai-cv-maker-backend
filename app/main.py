@@ -2,8 +2,8 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pypdf
 import io
-from services import generate_tailored_assets
-from schemas import FinalTailoredOutput
+from app.services.cv_generator import generate_tailored_assets
+from app.schemas.tailored_cv import FinalTailoredOutput
 
 app = FastAPI(title="AI CV Tailor Engine API")
 

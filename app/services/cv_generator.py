@@ -1,7 +1,7 @@
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
-from schemas import FinalTailoredOutput
+from app.schemas.tailored_cv import FinalTailoredOutput
 
 def generate_tailored_assets(extracted_cv_text: str, job_description: str) -> FinalTailoredOutput:
     # Initialize Gemini Model - 1.5-flash is extremely fast, free-tier friendly, and accurate
