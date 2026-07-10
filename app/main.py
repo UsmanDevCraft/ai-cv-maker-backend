@@ -1,10 +1,53 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+import pypdf
+import io
+from services import generate_tailored_assets
+from schemas import FinalTailoredOutput
 
-app = FastAPI()
+app = FastAPI(title="AI CV Tailor Engine API")
 
+# Setup CORS for local or production Next.js frontend communication
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], # Update this to match your frontend port/domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/")
-def home():
-    return {
-        "message": "AI Backend Running!"
-    }
+def extract_text_from_pdf(file_bytes: bytes) -> str:
+    try:
+        pdf_file = io.BytesIO(file_bytes)
+        reader = pypdf.PdfReader(pdf_file)
+        text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
+        return text.strip()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to parse PDF document: {str(e)}")
+
+@app.post("/api/tailor-cv", response_model=FinalTailoredOutput)
+async def tailor_cv_endpoint(
+    cv_file: UploadFile = File(...),
+    job_description: str = Form(...)
+):
+    # Ensure uploaded file is a PDF
+    if not cv_file.filename.endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF file format is supported at this moment.")
+        
+    # Step 1: Read and Extract Text
+    file_bytes = await cv_file.read()
+    raw_cv_text = extract_text_from_pdf(file_bytes)
+    
+    if not raw_cv_text:
+         raise HTTPException(status_code=400, detail="The uploaded PDF file is empty or unreadable.")
+         
+    # Step 2 & 3: Invoke LangChain Engine to compare, rewrite, and parse JSON
+    try:
+        final_output = generate_tailored_assets(raw_cv_text, job_description)
+        return final_output
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI processing engine error: {str(e)}")
