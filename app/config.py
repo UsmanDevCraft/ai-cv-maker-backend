@@ -1,3 +1,10 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
 # Maximum upload size (5 MB)
 MAX_FILE_SIZE = 5 * 1024 * 1024
 

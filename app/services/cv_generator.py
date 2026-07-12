@@ -1,15 +1,15 @@
-import os
 from fastapi import HTTPException
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from app.schemas.tailored_cv import FinalTailoredOutput
 from app.utils.logger import logger
+from app.config import GOOGLE_API_KEY
 
 # Create Gemini client once
 llm = ChatGoogleGenerativeAI(
     model="gemini-3.5-flash",
     temperature=0.3,
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
+    google_api_key=GOOGLE_API_KEY,
     timeout=30,
 )
 
