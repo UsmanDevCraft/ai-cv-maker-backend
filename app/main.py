@@ -44,7 +44,7 @@ async def tailor_cv_endpoint(
         str,
         Form(
             min_length=10,
-            max_length=2500,
+            max_length=3500,
         ),
     ],
     cv_file: UploadFile = File(...),

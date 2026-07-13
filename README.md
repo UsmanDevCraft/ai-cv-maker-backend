@@ -1,4 +1,4 @@
-# ResumeForge AI - AI CV Maker
+# CVForbes - AI CV Maker
 
 A production-oriented FastAPI backend that intelligently tailors resumes and generates ATS-optimized cover letters using Google's Gemini LLM.
 
