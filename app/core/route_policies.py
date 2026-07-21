@@ -1,7 +1,7 @@
 from typing import Final
 
 USAGE_TRACKED_ROUTES: Final = {
-    ("POST", "/api/tailor-cv"),
+    ("POST", "/api/v1/tailor-cv"),
 }
 
 ADMIN_ROUTES: Final = ("/api/v1/admin",)
