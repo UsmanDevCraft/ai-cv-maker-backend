@@ -49,7 +49,7 @@ class IPGuardMiddleware(BaseHTTPMiddleware):
 
             user = await self.anonymous_service.get_or_create(identity)
 
-            # await self.anonymous_service.register_request(user)
+            await self.anonymous_service.validate_request(user)
 
             request.state.anonymous_user = user
 

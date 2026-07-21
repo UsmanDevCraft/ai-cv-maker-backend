@@ -1,10 +1,15 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
+from time import perf_counter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import (
     run_in_threadpool,
 )
 from typing import Annotated
-from app.services.cv_generator import generate_tailored_assets, cleanup_extracted_text
+from app.services.cv_generator import (
+    generate_tailored_assets,
+    cleanup_extracted_text,
+    GenerationResult,
+)
 from app.schemas.tailored_cv import FinalTailoredOutput
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -19,6 +24,7 @@ from app.utils.pdf import extract_text_from_pdf
 from dotenv import load_dotenv
 from app.middleware.ip_guard import IPGuardMiddleware
 from app.services.anonymous_user_service import AnonymousUserService
+from app.services.generation_service import GenerationService
 from app.database.database import lifespan
 
 load_dotenv()
@@ -43,6 +49,7 @@ app.add_middleware(
 app.add_middleware(IPGuardMiddleware)
 
 anonymous_service = AnonymousUserService()
+generation_service = GenerationService()
 
 
 @app.post("/api/tailor-cv", response_model=FinalTailoredOutput)
@@ -109,15 +116,40 @@ async def tailor_cv_endpoint(
             f"Processing resume | Size={len(file_bytes)} bytes | Characters={len(raw_cv_text)}"
         )
 
+        start = perf_counter()
+
         # CRITICAL RENDER FIX:
         # Run the heavy LangChain blocking function in an external thread pool.
         # This keeps FastAPI's main loop awake so Render doesn't think the app crashed/timed out.
-        final_output = await run_in_threadpool(
+        result: GenerationResult = await run_in_threadpool(
             generate_tailored_assets, raw_cv_text, normalized_job_desc
         )
+        final_output = result.output
+
+        generation_time_ms = int((perf_counter() - start) * 1000)
 
         await anonymous_service.increment_usage(request.state.anonymous_user)
-        logger.info("Resume processed successfully.")
+
+        await generation_service.save_generation(
+            anonymous_user=request.state.anonymous_user,
+            filename=cv_file.filename,
+            provider=result.provider,
+            model=result.model,
+            generation_time_ms=generation_time_ms,
+            ats_score=final_output.analytics.ats_score,
+            parse_score=final_output.analytics.resume_parse_rate,
+            parsed_resume=result.parsed_profile.model_dump(),
+            tailored_resume=final_output.cv.model_dump(),
+            cover_letter=final_output.cover_letter,
+        )
+
+        logger.info(
+            "Resume processed successfully.",
+            extra={
+                "fingerprint": request.state.anonymous_user.fingerprint,
+                "requests_today": request.state.anonymous_user.requests_today + 1,
+            },
+        )
 
         return final_output
 
