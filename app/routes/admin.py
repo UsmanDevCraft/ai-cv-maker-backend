@@ -1,6 +1,13 @@
 from fastapi import APIRouter, Depends, Request
 from app.services.analytics_service import AnalyticsService
 from app.schemas.pagination import PaginationParams
+from app.schemas.admin import (
+    StatsResponse,
+    PaginatedUserResponse,
+    PaginatedGenerationResponse,
+    PaginatedBanResponse,
+    AnalyticsResponse,
+)
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -13,13 +20,13 @@ analytics_service = AnalyticsService()
 limiter = Limiter(key_func=get_remote_address)
 
 
-@router.get("/stats")
+@router.get("/stats", response_model=StatsResponse)
 @limiter.limit("15/minute")
 async def dashboard_stats(request: Request):
     return await analytics_service.dashboard_stats()
 
 
-@router.get("/users")
+@router.get("/users", response_model=PaginatedUserResponse)
 @limiter.limit("15/minute")
 async def users(request: Request, pagination: PaginationParams = Depends()):
     return await analytics_service.recent_users(
@@ -27,7 +34,7 @@ async def users(request: Request, pagination: PaginationParams = Depends()):
     )
 
 
-@router.get("/generations")
+@router.get("/generations", response_model=PaginatedGenerationResponse)
 @limiter.limit("15/minute")
 async def generations(request: Request, pagination: PaginationParams = Depends()):
     return await analytics_service.recent_generations(
@@ -35,7 +42,7 @@ async def generations(request: Request, pagination: PaginationParams = Depends()
     )
 
 
-@router.get("/bans")
+@router.get("/bans", response_model=PaginatedBanResponse)
 @limiter.limit("15/minute")
 async def bans(request: Request, pagination: PaginationParams = Depends()):
     return await analytics_service.active_bans(
@@ -43,7 +50,7 @@ async def bans(request: Request, pagination: PaginationParams = Depends()):
     )
 
 
-@router.get("/analytics")
+@router.get("/analytics", response_model=AnalyticsResponse)
 @limiter.limit("20/minute")
 async def analytics(request: Request):
     return await analytics_service.analytics()

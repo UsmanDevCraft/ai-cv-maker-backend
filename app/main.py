@@ -23,6 +23,7 @@ from app.utils.logger import logger
 from app.utils.pdf import extract_text_from_pdf
 from dotenv import load_dotenv
 from app.middleware.ip_guard import IPGuardMiddleware
+from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.services.anonymous_user_service import AnonymousUserService
 from app.services.generation_service import GenerationService
 from app.database.database import lifespan
@@ -47,6 +48,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(IPGuardMiddleware)
 app.include_router(admin_router)
 
