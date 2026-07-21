@@ -28,6 +28,8 @@ from app.services.anonymous_user_service import AnonymousUserService
 from app.services.generation_service import GenerationService
 from app.database.database import lifespan
 from app.routes.admin import router as admin_router
+from app.core.abuse_points import AI_FAILURE
+from app.services.abuse_service import AbuseService
 
 load_dotenv()
 
@@ -54,6 +56,7 @@ app.include_router(admin_router)
 
 anonymous_service = AnonymousUserService()
 generation_service = GenerationService()
+abuse_service = AbuseService()
 
 
 @app.post("/api/tailor-cv", response_model=FinalTailoredOutput)
@@ -161,6 +164,13 @@ async def tailor_cv_endpoint(
         raise
 
     except Exception:
+        await abuse_service.increase_score(
+            user=request.state.anonymous_user,
+            identity=request.state.identity,
+            points=AI_FAILURE,
+            reason="Unexpected AI processing failure",
+        )
+
         logger.exception("Unexpected error while processing resume.")
 
         raise HTTPException(
