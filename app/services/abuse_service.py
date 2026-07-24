@@ -1,9 +1,9 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
-from app.repositories.banned_ip_repository import BannedRepository
-from app.services.client_identity_service import ClientIdentity
 from app.models.anonymous_user import AnonymousUser
 from app.repositories.anonymous_user_repository import AnonymousRepository
+from app.repositories.banned_ip_repository import BannedRepository
+from app.services.client_identity_service import ClientIdentity
 
 TEMP_BAN_SCORE = 70
 PERMANENT_BAN_SCORE = 100

@@ -2,9 +2,8 @@ import logging
 import re
 
 import fitz
-from fastapi import HTTPException
-
 from app.config import MAX_PDF_PAGES
+from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -93,10 +92,9 @@ def generate_pdf(text: str) -> bytes:
         pdf_bytes = doc.write()
         doc.close()
         return pdf_bytes
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to generate PDF.")
         raise HTTPException(
             status_code=500,
             detail="Failed to generate PDF.",
         )
-

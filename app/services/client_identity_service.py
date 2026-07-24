@@ -6,7 +6,6 @@ from dataclasses import dataclass
 
 from fastapi import Request
 
-
 COOKIE_NAME = "cvforbes_id"
 
 

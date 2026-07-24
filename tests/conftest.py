@@ -7,7 +7,6 @@ pytest_plugins = ["tests.fixtures.pdf_fixtures", "tests.fixtures.profile_fixture
 os.environ["GOOGLE_API_KEY"] = "mock-google-key"
 os.environ["GROQ_API_KEY"] = "mock-groq-key"
 os.environ["OPENROUTER_API_KEY"] = "mock-openrouter-key"
-os.environ["OLLAMA_BASE_URL"] = "http://localhost:11434"
 
 from fastapi.testclient import TestClient
 from app.main import app

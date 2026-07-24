@@ -1,11 +1,6 @@
 from time import perf_counter
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
-from fastapi.concurrency import run_in_threadpool
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
 from app.config import ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE, MAX_TEXT_LENGTH
 from app.core.abuse_points import AI_FAILURE
 from app.schemas.tailored_cv import FinalTailoredOutput
@@ -19,6 +14,10 @@ from app.services.cv_generator import (
 from app.services.generation_service import GenerationService
 from app.utils.logger import logger
 from app.utils.pdf import extract_text_from_pdf
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
+from fastapi.concurrency import run_in_threadpool
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter(tags=["CV Generation"])
 
@@ -39,7 +38,7 @@ async def tailor_cv_endpoint(
             min_length=10,
         ),
     ],
-    cv_file: UploadFile = File(...),
+    cv_file: Annotated[UploadFile, File()],
 ):
     # Normalize CRLF (\r\n) to LF (\n) to match frontend counting logic
     normalized_job_desc = job_description.replace("\r\n", "\n")
@@ -132,7 +131,7 @@ async def tailor_cv_endpoint(
     except HTTPException:
         raise
 
-    except Exception:
+    except Exception:  # noqa: BLE001
         await abuse_service.increase_score(
             user=request.state.anonymous_user,
             identity=request.state.identity,

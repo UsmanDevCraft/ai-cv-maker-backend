@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
+
 from app.core.constants import MAX_DAILY_CVS
 from app.core.exceptions import DailyLimitExceeded
-
 from app.models.anonymous_user import AnonymousUser
 from app.repositories.anonymous_user_repository import AnonymousRepository
 from app.services.client_identity_service import ClientIdentity

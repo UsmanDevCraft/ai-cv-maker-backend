@@ -1,8 +1,7 @@
 from app.config import OPENROUTER_API_KEY
-from langchain_openai import ChatOpenAI
-
 from app.llm.base import BaseProvider
 from app.llm.models import Models
+from langchain_openai import ChatOpenAI
 
 
 class OpenRouterProvider(BaseProvider):

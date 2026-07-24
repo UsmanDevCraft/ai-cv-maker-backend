@@ -1,8 +1,7 @@
 from app.config import GROQ_API_KEY
-from langchain_groq import ChatGroq
-
 from app.llm.base import BaseProvider
 from app.llm.models import Models
+from langchain_groq import ChatGroq
 
 
 class GroqProvider(BaseProvider):
